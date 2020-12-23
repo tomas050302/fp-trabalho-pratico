@@ -62,31 +62,105 @@ def option_switch(option):
     elif(option == 7):
         total_attendance()
     elif(option == 8):
-        team_info()
+        teams = get_all_teams(json_file_path)
+        for team in teams:
+            print(str(team['index']) + '. ' + team['team'])
+
+        try:
+            opt = int(input('Introduza uma opção: '))
+
+            if (opt < 1 or opt > 81):
+                print('Introduza uma opção válida.')
+                return
+
+            team_info = get_team_info(teams, opt)
+
+            pretty_obj = pretiffy_json(team_info)
+
+            print(pretty_obj)
+
+        except ValueError:
+            print('Deve introduzar um valor numérico')
+
     elif(option == 9):
-        delete_json_file()
+        delete_json_file(json_file_path)
     elif(option == 10):
         sys.exit()
     else:
         print('Opção Inválida.')
 
 
+def pretiffy_json(data):
+    return json.dumps(data, indent=4)
+
+
 def print_json_file(file_path):
     with open(file_path, 'r') as file:
         json_obj = json.load(file)
 
-    pretty_obj = json.dumps(json_obj, indent=4)
+    pretty_obj = pretiffy_json(json_obj)
 
     print(pretty_obj)
 
 
 def print_csv_file(file_path):
-    data = {}
-
     with open(file_path, newline='') as file:
         reader = csv.reader(file)
         for row in reader:
             print(row)
+
+
+def get_all_teams(file_path):
+    with open(file_path, 'r') as file:
+        json_obj = json.load(file)
+
+    teams = []
+
+    for competition in json_obj:
+        for game in competition['games']:
+            if(not (game['home'] in teams)):
+                teams.append(game['home'])
+
+            if(not(game['away'] in teams)):
+                teams.append(game['away'])
+
+    teams.sort()
+
+    data = []
+    i = 1
+
+    for team in teams:
+        data.append({'index': i, 'team': team})
+        i += 1
+
+    return data
+
+
+def get_team_info(teams, index):
+    team = teams[index - 1]['team']
+
+    with open(json_file_path, 'r') as file:
+        json_obj = json.load(file)
+
+    team_data = []
+
+    for competition in json_obj:
+        for game in competition['games']:
+            if(game['home'] == team or game['away'] == team):
+                team_data.append(game)
+
+    return team_data
+
+
+def delete_json_file(path):
+    import os
+
+    try:
+        os.remove(path)
+
+        print('Ficheiro eliminado.')
+    except OSError:
+        print('Alguma coisa correu mal.')
 
 
 def start():

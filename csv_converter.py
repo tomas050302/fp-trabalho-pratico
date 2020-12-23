@@ -1,15 +1,14 @@
 ''' csv_converter.py '''
 
-# Simple Module to translate CSV information about all the world cups to a JSON file
-
 import json
 import csv
 
-def make_json(csvFilePath, jsonFilePath):
+
+def make_json(csv_file_path, json_file_path):
     data = []
 
-    with open(csvFilePath, 'r') as csvReader:
-        print('Opening CSV file ...')
+    with open(csv_file_path, 'r') as csvReader:
+        print('A abrir ficheiro CSV ...')
         for line in csv.DictReader(csvReader):
             data.append(line)
 
@@ -29,6 +28,7 @@ def make_json(csvFilePath, jsonFilePath):
                 'a_score': data[i]['a_score'],
                 'date': data[i]['date'],
                 'stadium': data[i]['stadium'],
+                'attendance': data[i]['attendance'],
                 'date': data[i]['date'],
                 'phase': data[i]['phase']
             })
@@ -54,6 +54,7 @@ def make_json(csvFilePath, jsonFilePath):
                 'a_score': data[i]['a_score'],
                 'date': data[i]['date'],
                 'stadium': data[i]['stadium'],
+                'attendance': data[i]['attendance'],
                 'date': data[i]['date'],
                 'phase': data[i]['phase']
             })
@@ -70,8 +71,8 @@ def make_json(csvFilePath, jsonFilePath):
             final_data.pop(-2)  # Correction from last append
             break
 
-    print('Successefully converted to JSON.')
+    print('Convertido para JSON com sucesso.')
 
-    with open(jsonFilePath, 'w', encoding='utf-8') as jsonf:
+    with open(json_file_path, 'w', encoding='utf-8') as jsonf:
         jsonf.write(json.dumps(final_data, indent=4))
-        print('JSON file created!')
+        print('Ficheiro JSON criado!')

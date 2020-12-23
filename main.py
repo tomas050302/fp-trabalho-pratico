@@ -60,7 +60,12 @@ def option_switch(option):
     elif(option == 6):
         search_in_file()
     elif(option == 7):
-        total_attendance()
+        spectators = total_attendance()
+
+        for info in spectators:
+            print(
+                str(info['year']) + ': ' + str(info['spectators']))
+        print('\nNota: Nem todos os jogos têm informação atualizada quanto ao número de espetadores.')
     elif(option == 8):
         teams = get_all_teams(json_file_path)
         for team in teams:
@@ -132,6 +137,24 @@ def get_all_teams(file_path):
     for team in teams:
         data.append({'index': i, 'team': team})
         i += 1
+
+    return data
+
+
+def total_attendance():
+    with open(json_file_path, 'r') as file:
+        json_obj = json.load(file)
+
+    data = []
+
+    for competition in json_obj:
+        spectators = 0
+
+        for game in competition['games']:
+            if(game['attendance']):
+                spectators += int(game['attendance'])
+
+        data.append({'year': competition['year'], 'spectators': spectators})
 
     return data
 

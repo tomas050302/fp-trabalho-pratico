@@ -1,7 +1,9 @@
 import csv
 import json
-from csv_converter import make_json
 import sys
+
+from csv_converter import make_json
+from game import play
 
 csv_file_path = 'data.csv'
 json_file_path = 'data.json'
@@ -21,6 +23,10 @@ def try_to_create_file():
 
 
 def print_menu():
+    import os
+
+    os.system('cls' if os.name == 'nt' else 'clear')
+
     print('1. Jogar')
     print('2. Gerar o ficheiro a partir do CSV')
     print('3. Consultar os dados de assistência')
@@ -36,17 +42,24 @@ def print_menu():
 
 def option_switch(option):
     if(option == 1):
-        game()
+        play()
     elif(option == 2):
         if(try_to_create_file()):
             print('O ficheiro já existe')
+            input('\nPressione a tecla ENTER para voltar ao menu...')
             return
     elif(option == 3):
         print_attendance_info()
+        input('\nPressione a tecla ENTER para voltar ao menu...')
+
     elif(option == 4):
         edit_attendance_info()
+        input('\nPressione a tecla ENTER para voltar ao menu...')
+
     elif(option == 5):
         delete_attendance_info()
+        input('\nPressione a tecla ENTER para voltar ao menu...')
+
     elif(option == 6):
         try:
             opt = int(input('Deseja abrir o ficheiro JSON ou CSV? (1/2): '))
@@ -57,8 +70,11 @@ def option_switch(option):
                 print_csv_file(csv_file_path)
             else:
                 print('Deve inserir um número entre 1 e 2')
+
+            input('\nPressione a tecla ENTER para voltar ao menu...')
         except ValueError:
             print('Deve inserir um valor numérico')
+            input('\nPressione a tecla ENTER para voltar ao menu...')
 
     elif(option == 7):
         search_in_file()
@@ -69,6 +85,8 @@ def option_switch(option):
             print(
                 str(info['year']) + ': ' + str(info['spectators']))
         print('\nNota: Nem todos os jogos têm informação atualizada quanto ao número de espetadores.')
+
+        input('\nPressione a tecla ENTER para voltar ao menu...')
     elif(option == 9):
         teams = get_all_teams(json_file_path)
         for team in teams:
@@ -79,6 +97,7 @@ def option_switch(option):
 
             if (opt < 1 or opt > 81):
                 print('Introduza uma opção válida.')
+                input('\nPressione a tecla ENTER para voltar ao menu...')
                 return
 
             team_info = get_team_info(teams, opt)
@@ -87,15 +106,20 @@ def option_switch(option):
 
             print(pretty_obj)
 
+            input('\nPressione a tecla ENTER para voltar ao menu...')
         except ValueError:
-            print('Deve introduzar um valor numérico')
+            print('Deve introduzir um valor numérico')
+            input('\nPressione a tecla ENTER para voltar ao menu...')
 
     elif(option == 10):
         delete_json_file(json_file_path)
+
+        input('\nPressione a tecla ENTER para voltar ao menu...')
     elif(option == 11):
         sys.exit()
     else:
         print('Opção Inválida.')
+        input('\nPressione a tecla ENTER para voltar ao menu...')
 
 
 def pretiffy_json(data):
@@ -261,11 +285,12 @@ def edit_game_attendance_info(competition_index, game_index, value):
 
 
 def start():
-    print_menu()
 
     try:
-        option = int(input('Escolha uma opção: '))
-        option_switch(option)
+        while True:  # The loop will end with option 11 that calls sys.quit()
+            print_menu()
+            option = int(input('Escolha uma opção: '))
+            option_switch(option)
     except ValueError:
         print('Deve introduzir um valor numérico.')
 

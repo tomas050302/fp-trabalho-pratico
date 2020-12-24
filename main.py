@@ -23,14 +23,15 @@ def try_to_create_file():
 def print_menu():
     print('1. Jogar')
     print('2. Gerar o ficheiro a partir do CSV')
-    print('3. Alterar dados de assistência')
-    print('4. Eliminar dados de assistência')
-    print('5. Consultar')
-    print('6. Pesquisar')
-    print('7. Total de espetadores')
-    print('8. Informações de uma seleção')
-    print('9. Eliminar ficheiro JSON')
-    print('10. Sair\n')
+    print('3. Consultar os dados de assistência')
+    print('4. Alterar dados de assistência')
+    print('5. Eliminar dados de assistência')
+    print('6. Consultar todos os dados')
+    print('7. Pesquisar')
+    print('8. Total de espetadores')
+    print('9. Informações de uma seleção')
+    print('10. Eliminar ficheiro JSON')
+    print('11. Sair\n')
 
 
 def option_switch(option):
@@ -41,10 +42,12 @@ def option_switch(option):
             print('O ficheiro já existe')
             return
     elif(option == 3):
-        change_attendance_info()
+        print_attendance_info()
     elif(option == 4):
-        delete_attendance_info()
+        edit_attendance_info()
     elif(option == 5):
+        delete_attendance_info()
+    elif(option == 6):
         try:
             opt = int(input('Deseja abrir o ficheiro JSON ou CSV? (1/2): '))
 
@@ -57,16 +60,16 @@ def option_switch(option):
         except ValueError:
             print('Deve inserir um valor numérico')
 
-    elif(option == 6):
-        search_in_file()
     elif(option == 7):
+        search_in_file()
+    elif(option == 8):
         spectators = total_attendance()
 
         for info in spectators:
             print(
                 str(info['year']) + ': ' + str(info['spectators']))
         print('\nNota: Nem todos os jogos têm informação atualizada quanto ao número de espetadores.')
-    elif(option == 8):
+    elif(option == 9):
         teams = get_all_teams(json_file_path)
         for team in teams:
             print(str(team['index']) + '. ' + team['team'])
@@ -87,9 +90,9 @@ def option_switch(option):
         except ValueError:
             print('Deve introduzar um valor numérico')
 
-    elif(option == 9):
-        delete_json_file(json_file_path)
     elif(option == 10):
+        delete_json_file(json_file_path)
+    elif(option == 11):
         sys.exit()
     else:
         print('Opção Inválida.')
@@ -184,6 +187,77 @@ def delete_json_file(path):
         print('Ficheiro eliminado.')
     except OSError:
         print('Alguma coisa correu mal.')
+
+
+def print_attendance_info():
+    with open(json_file_path, 'r') as file:
+        json_obj = json.load(file)
+
+    for competition in json_obj:
+        print(str(competition['name']))
+        for game in competition['games']:
+            print('    ' + str(game['home']) +
+                  ' x ' + str(game['away']) + ': ' + str(game['attendance']))
+
+
+def edit_attendance_info():
+    with open(json_file_path, 'r') as file:
+        json_obj = json.load(file)
+
+    i = 0
+    for competition in json_obj:
+        print(str(i + 1) + '. ' + str(competition['name']))
+        i += 1
+
+    try:
+        option = int(input(
+            '\nIntroduza o número da competição que pretende editar: '))
+
+        if(option < 1 or option > 19):
+            print('Introduza uma opção válida.')
+            return
+
+        edit_competition_attendance_info(json_obj, option)
+    except ValueError:
+        print('Deve inserir um valor numérico.')
+
+
+def edit_competition_attendance_info(competitions, competition_index):
+    competition = competitions[competition_index]
+
+    print('\n\nA editar a informação de ' + str(competition['name']) + '\n')
+    i = 0
+    for game in competition['games']:
+        print(str(i+1) + '. ' + str(game['home']) + ' x ' +
+              str(game['away']) + ': ' + str(game['attendance']))
+        i += 1
+
+    try:
+        option = int(
+            input('\nEscolha um jogo para editar a informação de assistência: '))
+
+        if(option < 1 or option > i + 1):
+            print('Introduza uma opção válida.')
+
+        try:
+            new_value = int(input('Introduza o novo valor de assistência: '))
+            edit_game_attendance_info(
+                competition_index, option - 1, new_value)
+        except ValueError:
+            print('Deve inserir um valor numérico.')
+
+    except ValueError:
+        print('Deve inserir um valor numérico.')
+
+
+def edit_game_attendance_info(competition_index, game_index, value):
+    with open(json_file_path, 'r') as file:
+        json_obj = json.load(file)
+
+    json_obj[competition_index]['games'][game_index]['attendance'] = str(value)
+
+    with open(json_file_path, 'w', encoding='utf-8') as outfile:
+        outfile.write(json.dumps(json_obj, indent=4))
 
 
 def start():

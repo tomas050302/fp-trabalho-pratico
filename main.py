@@ -19,6 +19,8 @@ def try_to_create_file():
             return False
         except FileNotFoundError:
             print('Ficheiro de dados (CSV) não encontrado.')
+            input('\nPressione a tecla ENTER para voltar ao menu...')
+
             return False
 
 
@@ -48,6 +50,9 @@ def option_switch(option):
             print('O ficheiro já existe')
             input('\nPressione a tecla ENTER para voltar ao menu...')
             return
+        else:
+            input('\nPressione a tecla ENTER para voltar ao menu...')
+
     elif(option == 3):
         print_attendance_info()
         input('\nPressione a tecla ENTER para voltar ao menu...')

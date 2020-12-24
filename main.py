@@ -44,7 +44,9 @@ def print_menu():
 
 def option_switch(option):
     if(option == 1):
-        play()
+        play(json_file_path)
+        input('\nPressione a tecla ENTER para voltar ao menu...')
+
     elif(option == 2):
         if(try_to_create_file()):
             print('O ficheiro já existe')

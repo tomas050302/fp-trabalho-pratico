@@ -21,10 +21,11 @@ def play(json_file_path):
 
         while(correct != -1):
             clear_console()
+            print(
+                f'--------------------------------Pontos: {points}--------------------------------\n')
             correct = game(json_obj)
             if(correct == 1):
                 points += 1
-                continue
 
             if(correct != -1):
                 input('\nPressione a tecla ENTER passar à próxima pergunta...')

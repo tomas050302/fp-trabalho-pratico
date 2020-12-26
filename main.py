@@ -64,7 +64,10 @@ def option_switch(option):
         input('\nPressione a tecla ENTER para voltar ao menu...')
 
     elif(option == 5):
-        delete_attendance_info()
+        delete_file(json_file_path)
+        try_to_create_file()
+
+        print('Dados de assistência resetados...')
         input('\nPressione a tecla ENTER para voltar ao menu...')
 
     elif(option == 6):
@@ -84,7 +87,8 @@ def option_switch(option):
             input('\nPressione a tecla ENTER para voltar ao menu...')
 
     elif(option == 7):
-        search_in_file()
+        search_in_file(json_file_path)
+        input('\nPressione a tecla ENTER para voltar ao menu...')
     elif(option == 8):
         spectators = total_attendance()
 
@@ -119,7 +123,7 @@ def option_switch(option):
             input('\nPressione a tecla ENTER para voltar ao menu...')
 
     elif(option == 10):
-        delete_json_file(json_file_path)
+        delete_file(json_file_path)
 
         input('\nPressione a tecla ENTER para voltar ao menu...')
     elif(option == 11):
@@ -134,8 +138,10 @@ def pretiffy_json(data):
 
 
 def print_json_file(file_path):
-    with open(file_path, 'r') as file:
-        json_obj = json.load(file)
+    json_obj = open_file(file_path)
+
+    if(json_obj == False):
+        return
 
     pretty_obj = pretiffy_json(json_obj)
 
@@ -143,15 +149,20 @@ def print_json_file(file_path):
 
 
 def print_csv_file(file_path):
-    with open(file_path, newline='') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            print(row)
+    try:
+        with open(file_path, newline='') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                print(row)
+    except FileNotFoundError:
+        print('CSV file not found.')
 
 
 def get_all_teams(file_path):
-    with open(file_path, 'r') as file:
-        json_obj = json.load(file)
+    json_obj = open_file(file_path)
+
+    if(json_obj == False):
+        return
 
     teams = []
 
@@ -176,8 +187,10 @@ def get_all_teams(file_path):
 
 
 def total_attendance():
-    with open(json_file_path, 'r') as file:
-        json_obj = json.load(file)
+    json_obj = open_file(json_file_path)
+
+    if(json_obj == False):
+        return
 
     data = []
 
@@ -193,11 +206,111 @@ def total_attendance():
     return data
 
 
+def search_in_file(path):
+    json_obj = open_file(path)
+
+    if(json_obj == False):
+        return
+
+    years = []
+
+    for competition in json_obj:
+        years.append(competition['year'])
+
+    years.sort()
+
+    try:
+        needle = int(
+            input('Introduza um ano para ver as informações sobre a competição do mesmo: '))
+
+        (result_index, time, n_of_iterations) = sequencial_search(years, str(needle))
+
+        if(result_index == -1):
+            print(f'\nOops... O elemento não existe na lista.')
+
+        print('\n--------------------------------Pesquisa Sequencial--------------------------------')
+        print(
+            f'Tempo passado: {time}.\nNº de iterações: {n_of_iterations}')
+
+        (result_index, time, n_of_iterations) = binary_search(years, needle)
+        print('\n--------------------------------Pesquisa Binária--------------------------------')
+        print(f'Tempo passado: {time}\nNº de iterações: {n_of_iterations}')
+
+        if(result_index != -1):
+            try:
+                answer = input('Deseja ver o resultado da pesquisa? (S/N): ')
+
+                if(answer.lower() == 's'):
+                    # As the array is reversed in the sorting process the real index is the inverse of the index found
+                    result = pretiffy_json(json_obj[-(result_index + 1)])
+                    print(result)
+            except ValueError:
+                print('Deve inserir um valor numérico.')
+
+    except ValueError:
+        print('Deve inserir um valor numérico.')
+        return
+
+
+def sequencial_search(array, needle):
+    import time
+
+    start_time = time.time()
+    i = 0
+
+    for i in range(len(array)):
+        if(array[i] == needle):
+            i += 1
+            return (i, time.time() - start_time, i)
+
+    return (-1, time.time() - start_time, i)
+
+
+def binary_search(array, needle):
+    import time
+
+    start_time = time.time()
+
+    min = 0
+    max = len(array) - 1
+    mid = 0
+
+    i = 0
+
+    while min <= max:
+        i += 1
+        mid = (max + min) // 2
+
+        if int(array[mid]) < needle:
+            min = mid + 1
+
+        elif int(array[mid]) > needle:
+            max = mid - 1
+
+        else:
+            return (mid, time.time() - start_time, i)
+
+    return (-1, time.time() - start_time, i)
+
+
+def open_file(path):
+    try:
+        with open(path, 'r') as file:
+            json_obj = json.load(file)
+
+        return json_obj
+    except FileNotFoundError:
+        print('Ficheiro não encontrado.')
+        return False
+
+
 def get_team_info(teams, index):
     team = teams[index - 1]['team']
 
-    with open(json_file_path, 'r') as file:
-        json_obj = json.load(file)
+    json_obj = open_file(json_file_path)
+
+    if(json_obj == False):
+        return
 
     team_data = []
 
@@ -209,7 +322,7 @@ def get_team_info(teams, index):
     return team_data
 
 
-def delete_json_file(path):
+def delete_file(path):
     import os
 
     try:
@@ -221,8 +334,10 @@ def delete_json_file(path):
 
 
 def print_attendance_info():
-    with open(json_file_path, 'r') as file:
-        json_obj = json.load(file)
+    json_obj = open_file(json_file_path)
+
+    if(json_obj == False):
+        return
 
     for competition in json_obj:
         print(str(competition['name']))
@@ -232,8 +347,10 @@ def print_attendance_info():
 
 
 def edit_attendance_info():
-    with open(json_file_path, 'r') as file:
-        json_obj = json.load(file)
+    json_obj = open_file(json_file_path)
+
+    if(json_obj == False):
+        return
 
     i = 0
     for competition in json_obj:
@@ -282,8 +399,10 @@ def edit_competition_attendance_info(competitions, competition_index):
 
 
 def edit_game_attendance_info(competition_index, game_index, value):
-    with open(json_file_path, 'r') as file:
-        json_obj = json.load(file)
+    json_obj = open_file(json_file_path)
+
+    if(json_obj == False):
+        return
 
     json_obj[competition_index]['games'][game_index]['attendance'] = str(value)
 
@@ -292,7 +411,6 @@ def edit_game_attendance_info(competition_index, game_index, value):
 
 
 def start():
-
     try:
         while True:  # The loop will end with option 11 that calls sys.quit()
             print_menu()

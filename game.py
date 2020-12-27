@@ -89,8 +89,9 @@ def generate_options(game):
 
     while i < n_of_options_per_question:
         new_option = generate_wrong_option(home_score, away_score)
+        question_obj = {'correct': False, 'question': new_option}
 
-        if(new_option in options):
+        if(question_obj in options):
             continue
         else:
             options.append({'correct': False, 'question': new_option})

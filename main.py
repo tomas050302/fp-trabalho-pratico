@@ -365,7 +365,7 @@ def edit_attendance_info():
             print('Introduza uma opção válida.')
             return
 
-        edit_competition_attendance_info(json_obj, option)
+        edit_competition_attendance_info(json_obj, option - 1)
     except ValueError:
         print('Deve inserir um valor numérico.')
 
